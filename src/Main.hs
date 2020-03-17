@@ -76,7 +76,42 @@ handleGuess puzzle guess = do
  case (charInWord puzzle guess, alreadyGuessed puzzle guess) of
  	(_,True) -> do
  		putStrLn "You already guessed that, say something new"
+ 		return puzzle
+ 	(True,_) -> do
+ 		putStrLn "You found a letter of the word!"
+ 		return (fillInCharacter puzzle guess)
+ 	(False,_) -> do
+ 		putStrLn "You chose a word that isn't in the word"
+ 		return (fillInCharacter puzzle games)
+
+gameOver :: Puzzle -> IO()
+gameOver (Puzzle wordToGuess _ guessed) = 
+	if (length guessed) > 7 then
+		do putStrLn "You lose!"
+		   putStrLn $ "The word was " ++ wordToGuess
+		   exitSuccess
+    else return ()
+
+gameWin :: Puzzle -> IO()
+gameWin (Puzzle _ filledInSoFar _) = 
+	if all isJust filledInSoFar then
+		do putStrLn "You won"
+		exitSuccess
+	else return ()
+
+runGame :: Puzzle -> IO()
+runGame puzzle = forever $ do
+	gameOver puzzle
+	gameWin puzzle
+	putStrLn $ "Current puzzle is:" ++ show puzzle
+	putStrLn "Guess a letter:"
+	guess <- getLine
+	case guess of 
+		[c] -> handleGuess puzzle c >>= runGame
+		_ -> putStrLn "Your guess must be a single char"
 
 main :: IO ()
 main = do
-  putStrLn "hello world"
+ word <- randomWord'
+ let puzzle = freshPuzzle (fmap toLower word)
+ runGame puzzle
