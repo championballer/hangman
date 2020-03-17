@@ -59,7 +59,13 @@ renderPuzzleChar :: Maybe Char -> Char
 renderPuzzleChar Nothing = '_'
 renderPuzzleChar (Just c) = c
 
--- Handles the case wherein the char matches with multiple entities in the same string
+{-|
+This function handles the puzzle and the guess, when we know that it's a new guess. We try to flip over all nothings where this char can be put,
+So for the newFilledSoFar, the guessed character is checked with the word string, if they match then the card gets flipped, else we return the value as was
+present in the previous state maintained in filledSoFar, sent to the inscope argument guessChar.
+-}
+
+--TODO : Improve the name for guessChar, to identify the position of filledSoFar, not so clear right now.
 
 fillInCharacter :: Puzzle -> Char -> Puzzle
 fillInCharacter (Puzzle word filledInSoFar s) c = 
@@ -70,6 +76,12 @@ fillInCharacter (Puzzle word filledInSoFar s) c =
   	else guessChar
   newFilledSoFar = zipWith (zipper c) word filledInSoFar
 
+
+{- |
+This function accepts the current puzzle state and the guessed char, the guessed char is sent to the the two boolean functions to get
+the state of presence of the char, if already guessed, we go back. If present, we turn over all the positions where the character was present
+along with adding it into already made guesses section, and if it isn't still, goes in the made guesses section.
+-}
 handleGuess :: Puzzle -> Char -> IO Puzzle
 handleGuess puzzle guess = do
  putStrLn $ "Your guess was: " ++ [guess]
